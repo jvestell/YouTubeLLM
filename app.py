@@ -1,170 +1,4 @@
-# -*- coding: utf-8 -*-
-# Energy-Financial-Risk-Video-AIAgent.ipynb
-"""
-# Overall Plan
-# 1. Define the Enhanced MVP Scope
-Core Features for the Energy Market Risk-Focused MVP:
 
-## 1.1 User Input Interface
-
-Inputs:
-- Energy market (e.g., Mid-C hub, PJM)
-- Risk factors (e.g., market volatility, price fluctuations, energy demand)
-- Forecasting period (e.g., next 3 months, next year)
-- Risk analysis preferences (e.g., value-at-risk, correlation analysis)
-- Data types (e.g., renewable energy prices, natural gas futures)
-
-## 2.1 YouTube Video Collection
-
-Fetch relevant YouTube videos specifically about energy market trends, financial risk, and forecasting based on user inputs.
-
-## 3.1 Video Transcription
-
-Convert video audio to text using open-source speech-to-text models to extract key insights on market trends and risk factors.
-
-## 4.1 Content Summarization
-
-Summarize transcribed content to extract key financial risk metrics, such as price volatility, risk mitigation strategies, and market correlations.
-
-## 5.1 Risk Analysis Report Generation
-
-Create a detailed risk analysis report based on summarized content, highlighting key market risks and potential financial outcomes.
- 
-## 6.1 Presentation of Risk Report
-
-Display the generated risk analysis in a user-friendly format (e.g., web page with graphs and tables).
-
-Out of Scope for MVP:
-- Advanced multimodal integration (real-time market data analysis, sentiment analysis)
-- Real-time risk model simulation (live market feed integration)
-- Detailed financial forecast optimization with real-time pricing data
-- Visual map-based market correlation analysis
-
-# 2. Choose the Technology Stack
-## 2.1 Backend:
-### Programming Language: Python
-### Web Framework: Starlette (for real-time interactions and API integration)
-### AI Frameworks:
-#### Hugging Face Transformers: For leveraging pre-trained language models.
-#### LangChain: For orchestrating and managing the AI workflows.
-### APIs:
-#### YouTube Data API: To fetch relevant financial and energy market videos.
-
-## 2.2 Frontend:
-Framework: Dash or Streamlit (handles frontend for visualizing risk metrics and analysis)
-
-## 2.3 Database:
-Option: SQLite or a simple JSON-based storage for initial data collection and risk metric tracking.
-
-## 2.4 Deployment:
-Platform: Azure or any cloud platform with GPU support for real-time model execution.
-
-## 2.5 Additional Tools:
-Transcription: Open-source models like Whisper available on Hugging Face or Coqui STT.
-Summarization & Q&A: LLaMA 3 via Hugging Face or other open-source LMs for summarizing financial content.
-
-# **Role of PyTorch in Hugging Face Transformers**
-The Hugging Face Transformers library is crucial for processing financial risk analysis content from YouTube videos. PyTorch is the primary framework enabling efficient model execution.
-
-## 2.1 Model Implementation
-Most transformer models in Hugging Face's library, including LLaMA 3, are implemented using PyTorch. When you load a model via `AutoModelForCausalLM` or `AutoModelForSeq2SeqLM`, PyTorch helps to:
-
-- Define Model Architecture: Layers, attention mechanisms, etc.
-- Handle Parameters: Loading pre-trained weights, managing model parameters.
-- Execute Forward Passes: Processing input data through the model to generate outputs.
-
-## 2.2 Tokenization and Encoding
-The tokenizer converts raw financial content from transcripts into tokens that the model can process. PyTorch handles these tokens as tensors for further analysis.
-
-## 2.3 Inference and Summarization
-When summarizing risk metrics or financial insights:
-
-- Input Processing: The input text is tokenized into tensors.
-- Model Execution: These tensors pass through the model to generate summaries.
-- Output Decoding: The model's output is decoded back into readable summaries.
-
-All these steps are facilitated by PyTorch’s tensor operations and GPU acceleration, critical for handling large-scale financial data.
-
-Why is PyTorch Essential Here?
-- **Model Execution**: Large models like LLaMA 3 rely on PyTorch for efficient execution.
-- **GPU Acceleration**: PyTorch supports GPUs, speeding up computations for real-time risk analysis.
-- **Tensor Operations**: Financial data manipulation (tokenization, encoding, and decoding) uses tensor operations managed by PyTorch.
-- **Memory Management**: PyTorch efficiently manages memory, crucial for loading and processing large financial models and datasets.
-
-# 1. Incorporating Real-Time Market Data for Context:
-Strategy:
-
-- **Dynamic Data Embedding**: For market-specific questions (like “What are the current price trends for natural gas futures?”), embed real-time financial data alongside video content. For example, use real-time graphs for market trends, risk indices, or price correlations.
-- **Financial Forecasting**: Integrate APIs to display forecasts for energy prices, renewable output, or demand projections. Provide visual charts to help users analyze future market risks.
-- **Risk Visualization**: Show real-time market risk metrics, such as value-at-risk (VaR) or correlation analysis. This can help users understand how different factors (e.g., energy production) affect market risk.
-Example Use Case: When the app answers the question “What is the risk of price fluctuation in Mid-C hub?”, it could display graphs that show past and predicted price volatility.
-
-# 2. Using Machine Learning for Energy Risk Predictions:
-Strategy:
-
-- **Price Volatility Prediction**: Use machine learning models to predict energy market price volatility based on historical data and YouTube video transcripts. For example, train a model to forecast next month's natural gas prices.
-- **Risk Factor Identification**: Implement models to identify key risk factors (e.g., weather impacts, geopolitical events) that influence energy markets. Summarize these insights from YouTube videos.
-- **Financial Impact Estimation**: Use models to estimate the financial impact of identified risk factors, generating reports on potential losses or gains based on market conditions.
-Example Use Case: If a video discusses “renewable energy trends,” the model can estimate how these trends could impact future energy prices and related financial risks.
-
-# 3. Integrating Text-to-Video Models for Market Insights:
-Strategy:
-
-- **Market Summary Videos**: For each financial risk-related question (e.g., "What are the main risks in energy markets?"), use text-to-video models to generate short clips summarizing key insights from videos and data.
-- **Augmented Risk Reports**: Instead of just providing text-based answers, generate video reports on energy risks, including visualizations of market trends, historical price data, and future predictions.
-- **Visualizing Financial Risk Scenarios**: When answering questions about potential financial impacts, generate videos that simulate different risk scenarios. For example, a video could show price predictions under various demand conditions.
-Example Use Case: For the question “What are the risks of investing in solar energy?”, generate a video that highlights the pros and cons, including financial forecasts and historical performance trends.
-
-# 4. Multimodal Question Answering (QA) System:
-Strategy:
-
-- **Multimodal Inputs for Financial Risk Analysis**: Build a system where users can input text, financial data, or even upload relevant documents (e.g., PPA agreements). The app will provide combined insights, such as risk assessments or market trend analyses.
-- **Image-to-Text Summarization for Market Data**: Use computer vision to extract visual data from charts or graphs in video content and combine it with text-based analysis to offer a comprehensive financial risk report.
-Example Use Case: When users upload a graph showing energy prices, the app could suggest market trends, financial risks, and potential investment outcomes based on historical data.
-
-# 5. Interactive Risk Analysis with Financial Dashboards:
-Strategy:
-
-- **Interactive Financial Dashboards**: Provide users with an interactive dashboard to visualize key market risks, price volatility, and correlation analysis. This dashboard can pull from YouTube data and other real-time sources.
-- **Graph-Based Risk Metrics**: Create graphs showing price fluctuations, historical risk data, and potential financial outcomes based on YouTube video insights.
-- **Auto-Generated Risk Videos**: After generating a financial risk report, create a personalized video summarizing the key risks and potential financial outcomes for the user.
-Example Use Case: After answering “What are the top risks in the energy market?”, allow users to visualize risk factors through interactive graphs and auto-generate a short video summary.
-
-# 6. Fun and Interactive Financial Quizzes:
-Strategy:
-
-- **Market Risk Quizzes**: Create quizzes to test users' knowledge of financial risk concepts based on video insights. Use these to make learning about energy markets engaging and interactive.
-- **Interactive Dashboard Quiz**: Let users explore financial data on a dashboard and take quizzes to see if they can identify key market risks or trends.
-Example Use Case: After answering the question “What are the key risks in the energy sector?”, generate a quiz asking users to identify key risk factors, testing their knowledge of market dynamics.
-
-# 7. Voice Interactions and Text-to-Speech:
-Strategy:
-
-- **Text-to-Speech for Risk Reports**: Convert generated financial risk reports into spoken text using ElevenLabs or another text-to-speech model, allowing users to listen to their reports.
-- **Voice-Based Financial Assistant**: Allow users to ask financial risk questions via voice and respond with both spoken and visual answers (e.g., charts or graphs showing market risk trends).
-Example Use Case: When a user asks “What are the biggest risks in the energy market?”, the app provides a spoken response and visualizes key risk factors in a graph.
-"""
-# Set up
-
-## Install Libraries
-
-
-# Commented out IPython magic to ensure Python compatibility.
-# %pip install --upgrade --quiet  elevenlabs
-
-# Commented out IPython magic to ensure Python compatibility.
-# %pip install ollama
-
-#!curl https://ollama.ai/install.sh | sh
-
-#!ollama serve > rocama.log 2>&1 &
-#!ollama pull llama3
-
-#!pip install youtube-search-python youtube_transcript_api langchain_huggingface langchain langchain_community transformers torch faiss-cpu
-
-"""## Load Libraries"""
-
-# General
 import re
 import os
 import webbrowser
@@ -188,14 +22,18 @@ import faiss
 
 
 # Langchin | Elevenlabs | Langchain Agents
-from langchain import LLMChain
+from langchain.chains import LLMChain
+#from langchain import langchain.chains.LLMChain
 from langchain.prompts import PromptTemplate
-from langchain.agents import AgentType, initialize_agent, load_tools
+from langchain.agents import AgentType, initialize_agent
+from langchain_community.agent_toolkits.load_tools import load_tools
 from langchain_community.tools.eleven_labs.text2speech import ElevenLabsText2SpeechTool
+from elevenlabs.client import ElevenLabs
 from dotenv import load_dotenv
 import markdown
 import requests
-
+import json
+load_dotenv()
 """## Load Constants"""
 
 # Constants (Predefined Inputs)
@@ -204,7 +42,7 @@ PREFERENCES = ["Museums", "Outdoor Activities"]
 MAX_RESULTS = 20  # Number of videos to fetch
 MIN_VIEWS = 10000  # 10,000 views # Threshold for minimum views
 LLM = "facebook/bart-large-cnn"
-LOCAL_LLM = "llama3"
+LOCAL_LLM = "llama3.2:3b-instruct-fp16"
 MAX_TOKENS = 1000
 
 """# Build PipeLine Step by Step
@@ -649,30 +487,55 @@ top_k_videos[['Title', 'Transcript', 'Similarity Score', 'Query']]
 def generate_questions(city):
     prompt = f"Act as an Travel Agent and Expert in {city} tour Guide. Generate a list of the top 10 questions that a first-time traveler might ask about visiting {city}."
 
-    # Use the Chat API to generate responses
-    response = ollama.chat(model="llama3", messages=[{"role": "user", "content": prompt}])
+    response = requests.post('http://localhost:11434/api/chat', 
+                             json={
+                                 'model': 'llama3.2:3b-instruct-fp16',
+                                 'messages': [{"role": "user", "content": prompt}]
+                             },
+                             stream=True)  # Enable streaming
 
-    return response
+    full_response = ""
+    for line in response.iter_lines():
+        if line:
+            try:
+                json_response = json.loads(line)
+                if 'response' in json_response:
+                    full_response += json_response['response']
+                if json_response.get('done', False):
+                    break
+            except json.JSONDecodeError as e:
+                print(f"Error decoding JSON: {e}")
+                print(f"Problematic line: {line}")
+
+    return full_response
+
+def display_markdown(text):
+    html = markdown.markdown(text)
+    print(html)  # This will print the HTML. In a web context, you'd return this instead.
 
 # Example usage
 city = "Amsterdam"
-top_10_questions = generate_questions(city)
-print(top_10_questions)
+top_3_questions = generate_questions(city)
+print("Raw output:")
+print(top_3_questions)
 
-display(Markdown(top_10_questions['message']['content']))
+print("\nFormatted as HTML:")
+display_markdown(top_3_questions)
 
 # Function to generate questions using LLaMA 3 via Ollama with a refined prompt
-def generate_questions(city):
+
+# def generate_questions(city):
     # Refined prompt to ask specifically for only the questions, without extra text
-    prompt = f"""
-    As a travel guide expert, generate a list of the top 10 questions that a first-time traveler might ask about visiting {city}.
-    Please provide only the questions, numbered 1 to 10, without any additional descriptions.
-    """
+    #prompt = f"""
+    #As a travel guide expert, generate a list of the top 10 questions that a first-time traveler might ask about visiting {city}.
+    #Please provide only the questions, numbered 1 to 10, without any additional descriptions.
+    
 
     # Use Ollama's Chat API to generate the questions
-    response = ollama.chat(model="llama3", messages=[{"role": "user", "content": prompt}])
+    #response = ollama.chat(model="llama3", messages=[{"role": "user", "content": prompt}])
 
-    return response['message']['content']
+    #return response['message']['content']
+
 
 # Function to display the questions beautifully with Markdown
 def display_questions_with_markdown(city):
@@ -682,8 +545,15 @@ def display_questions_with_markdown(city):
     # Convert the text into a Markdown-friendly format
     markdown_output = f"### Top 10 Questions for First-Time Travelers to {city}:\n\n{questions_text}"
 
-    # Display the formatted text using Markdown
-    display(Markdown(markdown_output))
+    # Convert Markdown to HTML
+    html_output = markdown.markdown(markdown_output)
+
+    # Print the HTML output
+    print(html_output)
+
+    # Optionally, you can also print the raw Markdown if desired
+    print("\nRaw Markdown:")
+    print(markdown_output)
 
 # Example usage
 city = "Amsterdam"
