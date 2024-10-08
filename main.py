@@ -10,18 +10,18 @@ from text_to_speech import text_to_speech_elevenlabs
 load_dotenv()
 
 # Constants
-DESTINATION = "Amsterdam"
-PREFERENCES = ["Museums", "Outdoor Activities"]
+TOPIC = "Kill Tony comedy"
+PREFERENCES = ["Laughter"]
 MAX_RESULTS = 20
-MIN_VIEWS = 10000
+MIN_VIEWS = 100000
 LLM = "facebook/bart-large-cnn"
 LOCAL_LLM = "llama3.2:3b-instruct-fp16"
 MAX_TOKENS = 1000
 
 def main():
     # 1. Fetch YouTube videos
-    print("Fetching relevant YouTube videos about traveling in Amsterdam...\n")
-    videos = fetch_youtube_videos(DESTINATION, PREFERENCES, MIN_VIEWS, MAX_RESULTS)
+    print("Fetching relevant YouTube videos about comedy...\n")
+    videos = fetch_youtube_videos(TOPIC, PREFERENCES, MIN_VIEWS, MAX_RESULTS)
     videos_df = display_videos(videos)
 
     # 2. Extract transcripts
@@ -36,13 +36,19 @@ def main():
     faiss_index = build_faiss_index(passage_embeddings)
 
     # Example query
-    query = "What are the best museums in Amsterdam?"
-    top_k_videos = search_relevant_passages(videos_df, faiss_index, query_encoder, query_tokenizer, query, top_k=3)
-    print("Filtered Top-k Videos with Similarity Score and Query:")
-    print(top_k_videos[['Title', 'Transcript', 'Similarity Score', 'Query']])
+    query = "What are the best jokes that create laughter?"
+    top_k_videos = search_relevant_passages(videos_df, faiss_index, query_encoder, query_tokenizer, query, top_k=5)
+    print("\nTop 5 Jokes Found:")
+    for index, row in top_k_videos.iterrows():
+        print(f"\nJoke from video: '{row['Title']}'")
+        print(f"Transcript excerpt: {row['Transcript'][:300]}...")  # Print first 200 characters of the transcript
+        print(f"Similarity Score: {row['Similarity Score']:.2f}")
+        print("-" * 50)
+    #print("Filtered Top-k Videos with Similarity Score and Query:")
+    #print(top_k_videos[['Title', 'Transcript', 'Similarity Score', 'Query']])
 
     # 5. Generate questions
-    display_questions_with_markdown(DESTINATION)
+    display_questions_with_markdown(TOPIC)
 
     # 6. Text to speech
     text_to_speak = '''Top 3 Questions for First-Time Travelers to Amsterdam:
@@ -52,8 +58,8 @@ def main():
     Is Amsterdam safe for tourists?
     What are some must-see attractions in Amsterdam?
     '''
-    result = text_to_speech_elevenlabs(text_to_speak)
-    print(result)
+    #result = text_to_speech_elevenlabs(text_to_speak)
+    #print(result)
 
 if __name__ == "__main__":
     main()

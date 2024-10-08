@@ -7,15 +7,16 @@ def parse_views(views_str):
     """
     Parses the views string from YouTube and converts it to an integer.
     """
-    views_str = views_str.lower().replace('views', '').replace(',', '').strip()
+    if len(views_str) > 1:
+        views_str = views_str.lower().replace('views', '').replace(',', '').strip()
     return int(views_str)
 
-def fetch_youtube_videos(destination, preferences, min_views, max_results=10):
+def fetch_youtube_videos(topic, preferences, min_views, max_results=10):
     """
     Fetches relevant YouTube videos based on the destination and user preferences.
     """
     preferences_query = ' '.join(preferences)
-    search_query = f"{destination} travel guide {preferences_query} Netherlands"
+    search_query = f"{topic} episodes that mention {preferences_query}"
     videos_search = VideosSearch(search_query, limit=max_results)
     search_results = videos_search.result()
 
@@ -39,11 +40,11 @@ def display_videos(videos):
     Displays the list of videos in a pandas DataFrame.
     """
     if not videos:
-        print("No videos found with more than 10,000 views.")
+        print("No videos found with more than 1,000,000 views.")
         return pd.DataFrame()
 
     videos_df = pd.DataFrame(videos)
-    print("\nFetched YouTube Videos (Filtered by >10,000 views):")
+    print("\nFetched YouTube Videos (Filtered by >1,000,000 views):")
     print(videos_df[['Title', 'Duration', 'Views', 'Channel']].to_string(index=False))
     return videos_df
 
