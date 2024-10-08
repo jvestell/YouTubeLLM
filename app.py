@@ -29,10 +29,16 @@ from langchain.agents import AgentType, initialize_agent
 from langchain_community.agent_toolkits.load_tools import load_tools
 from langchain_community.tools.eleven_labs.text2speech import ElevenLabsText2SpeechTool
 from elevenlabs.client import ElevenLabs
+from elevenlabs import VoiceSettings
 from dotenv import load_dotenv
 import markdown
 import requests
 import json
+from io import BytesIO
+import os
+import pygame
+import time
+
 load_dotenv()
 """## Load Constants"""
 
@@ -133,7 +139,8 @@ def display_videos(videos):
     open_browser = input("\nDo you want to open these videos in your browser? (y/n): ").strip().lower()
     if open_browser == 'y':
         for video in videos:
-            webbrowser.open(video['Link'])
+            print("Let's not open the videos")
+            #webbrowser.open(video['Link'])
 
 display_videos(videos)
 
@@ -564,51 +571,54 @@ display_questions_with_markdown(city)
 ## 5.1 ElevenLabs without Agents
 """
 
-os.environ["ELEVEN_API_KEY"] = "MY_ELEVENLABS_API_KEY"
+pygame.mixer.init()
 
-text_to_speak = '''Top 10 Questions for First-Time Travelers to Amsterdam:
-Here are the top 10 questions that a first-time traveler might ask about visiting Amsterdam:
+text_to_speak = '''Top 3 Questions for First-Time Travelers to Amsterdam:
+Here are the top 3 questions that a first-time traveler might ask about visiting Amsterdam:
 
 What is the best way to get around Amsterdam?
 Is Amsterdam safe for tourists?
 What are some must-see attractions in Amsterdam?
-Can I drink the tap water in Amsterdam?
-Are there any specific dress code or cultural norms I should be aware of?
-How much money do I need to budget for food and activities?
-Is Amsterdam a good place for solo travelers or couples?
-What are some popular neighborhoods or areas to stay in?
-Can I bring my own bike or rent one in Amsterdam?
-Are there any unique or quirky experiences I should have while visiting Amsterdam?'''
+'''
 
-tts = ElevenLabsText2SpeechTool()
-print(tts.name)
+def text_to_speech_elevenlabs(text):
+    try:
+        elevenclient = ElevenLabs(api_key=os.getenv("ELEVEN_API_KEY"))
+        response = elevenclient.text_to_speech.convert(
+            voice_id="MF3mGyEYCl7XYWbV9V6O",
+            output_format="mp3_22050_32",
+            text=text,
+            model_id="eleven_turbo_v2",
+            voice_settings=VoiceSettings(stability=0.0, similarity_boost=1.0, style=0.0, use_speaker_boost=True),
+        )
 
-speech_file = tts.run(text_to_speak)
-speech_file
+        # Write the audio data to a BytesIO object
+        audio_data = BytesIO()
+        for chunk in response:
+            if chunk:
+                audio_data.write(chunk)
 
-tts.play(speech_file)
+        if audio_data.getbuffer().nbytes == 0:
+            raise ValueError("Audio data is empty.")
 
-"""## 5.2 ElevenLAbs with Agents"""
+        # Play the audio using pygame
+        audio_data.seek(0)
+        pygame.mixer.music.load(audio_data)
+        pygame.mixer.music.play()
 
-tools = load_tools(["eleven_labs_text2speech"])
+        # Wait for the audio to finish playing
+        while pygame.mixer.music.get_busy():
+            time.sleep(0.1)
 
-agent = initialize_agent(
-    tools=tools,
-    llm=LLM,
-    agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-    verbose=True,
-)
-audio_file = agent.run(text_to_speak)
+        return "Audio played successfully"
 
-"""To do:
-Make an AI agent which is travel agency expert and will determine all the question that traveler will have when coming to the Netherlands
-What do they need to buy
-where to eat
-where to stay
-which museum have entree with waiting list
-advantages like Museum Card
-which other cities are better to stay and they are close to public transport
-How to arrange public transport
-Travel Itinerary
-Amsterdam for First Timers
-"""
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        raise
+
+    except Exception as e:
+        #logging.error(f"An error occurred: {str(e)}")
+        raise
+
+result = text_to_speech_elevenlabs(text_to_speak)
+print(result)
