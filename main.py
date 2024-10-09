@@ -37,18 +37,32 @@ def main():
 
     # Example query
     query = "What are the best jokes that create laughter?"
-    top_k_videos = search_relevant_passages(videos_df, faiss_index, query_encoder, query_tokenizer, query, top_k=5)
+    top_k_videos = search_relevant_passages(
+        videos_df, 
+        faiss_index, 
+        query_encoder, 
+        query_tokenizer, 
+        query, 
+        top_k=5, 
+        laughter_weight=0.1, 
+        applause_weight=0.05
+    )
     print("\nTop 5 Jokes Found:")
     for index, row in top_k_videos.iterrows():
         print(f"\nJoke from video: '{row['Title']}'")
-        print(f"Transcript excerpt: {row['Transcript'][:300]}...")  # Print first 200 characters of the transcript
-        print(f"Similarity Score: {row['Similarity Score']:.2f}")
+        print(f"Transcript excerpt: {row['Transcript'][:300]}...")
+        print(f"Laughter count: {row['laughter_count']}")
+        print(f"Applause count: {row['applause_count']}")
+        print(f"Similarity Score: {row['Similarity Score']:.4f}")
         print("-" * 50)
     #print("Filtered Top-k Videos with Similarity Score and Query:")
     #print(top_k_videos[['Title', 'Transcript', 'Similarity Score', 'Query']])
 
     # 5. Generate questions
     display_questions_with_markdown(TOPIC)
+
+    # 6. Option to open videos
+    display_videos(top_k_videos.to_dict('records'))
 
     # 6. Text to speech
     text_to_speak = '''Top 3 Questions for First-Time Travelers to Amsterdam:

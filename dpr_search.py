@@ -38,9 +38,9 @@ def build_faiss_index(passage_embeddings):
     faiss_index.add(passage_embeddings)
     return faiss_index
 
-def search_relevant_passages(videos_df, faiss_index, query_encoder, query_tokenizer, query, top_k=3):
+def search_relevant_passages(videos_df, faiss_index, query_encoder, query_tokenizer, query, top_k=5, laughter_weight=0.1, applause_weight=0.05):
     """
-    Encode the query and search for the most relevant passages
+    Encode the query and search for the most relevant passages, incorporating laughter and applause counts
     """
     query_inputs = query_tokenizer(query, return_tensors='pt', max_length=128, truncation=True, padding=True)
 
@@ -49,11 +49,35 @@ def search_relevant_passages(videos_df, faiss_index, query_encoder, query_tokeni
 
     query_embedding = query_embedding.reshape(1, -1)
 
-    distances, indices = faiss_index.search(query_embedding, top_k)
+    # Initial search using FAISS
+    distances, indices = faiss_index.search(query_embedding, top_k * 2)  # Search for more candidates initially
 
-    top_k_indices = indices[0][:top_k]
-    top_k_videos = videos_df.iloc[top_k_indices].copy()
-    top_k_videos['Similarity Score'] = distances[0][:top_k]
+    # Get the candidate videos
+    candidate_indices = indices[0]
+    candidate_videos = videos_df.iloc[candidate_indices].copy()
+    
+    # Calculate the base similarity scores
+    base_similarity_scores = 1 / (1 + np.exp(distances[0]))  # Convert distances to similarity scores
+    
+    # Normalize laughter and applause counts
+    max_laughter = candidate_videos['laughter_count'].max()
+    max_applause = candidate_videos['applause_count'].max()
+    normalized_laughter = candidate_videos['laughter_count'] / max_laughter if max_laughter > 0 else 0
+    normalized_applause = candidate_videos['applause_count'] / max_applause if max_applause > 0 else 0
+    
+    # Calculate the final similarity scores
+    content_weight = 1 - (laughter_weight + applause_weight)
+    final_similarity_scores = (
+        base_similarity_scores * content_weight +
+        normalized_laughter * laughter_weight +
+        normalized_applause * applause_weight
+    )
+    
+    # Sort and select top_k videos based on the final similarity scores
+    candidate_videos['Similarity Score'] = final_similarity_scores
+    top_k_videos = candidate_videos.nlargest(top_k, 'Similarity Score')
+    
+    # Add query information
     top_k_videos['Query'] = query
 
     return top_k_videos
