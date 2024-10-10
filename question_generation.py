@@ -4,9 +4,9 @@ import markdown
 
 def generate_questions(city):
     """
-    Generate a list of top 10 questions for first-time travelers to a specific city using Ollama's API.
+    Generate a list of top 5 jokes using Ollama's API.
     """
-    prompt = f"Act as a Travel Agent and Expert in {city} tour Guide. Generate a list of the top 10 questions that a first-time traveler might ask about visiting {city}."
+    prompt = f"Act as a comedy expert at the {city} comedy show. Generate a list of the top 5 jokes that create laughter at {city}."
 
     response = requests.post('http://localhost:11434/api/chat', 
                              json={
@@ -32,11 +32,11 @@ def generate_questions(city):
 
 def display_questions_with_markdown(city):
     """
-    Generate and display the top 10 questions for first-time travelers using Markdown formatting.
+    Generate and display the top 5 jokes.
     """
     questions_text = generate_questions(city)
 
-    markdown_output = f"### Top 10 Questions for First-Time Travelers to {city}:\n\n{questions_text}"
+    markdown_output = f"### Top 5 jokes at {city}:\n\n{questions_text}"
 
     html_output = markdown.markdown(markdown_output)
 

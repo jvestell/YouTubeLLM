@@ -27,7 +27,19 @@ def summarize_text(transcript, summarizer_pipeline):
         chunks = split_text_into_chunks(t, summarizer_pipeline.tokenizer, summarizer_pipeline.model.config.max_position_embeddings)
         print(f"Nr of chunks: {len(chunks)}")
 
-        summaries = [summarizer_pipeline(chunk, max_length=130, min_length=30, do_sample=False)[0]['summary_text'] for chunk in chunks]
+        summaries = []
+        for chunk in chunks:
+            input_length = len(summarizer_pipeline.tokenizer.encode(chunk))
+            
+            if input_length <= 30:
+                # For very short inputs, just return the input as is
+                summaries.append(chunk)
+            else:
+                max_length = min(130, max(30, input_length // 2))  # Adjust max_length based on input length
+                min_length = min(30, max(10, input_length // 4))  # Adjust min_length based on input length
+                summary = summarizer_pipeline(chunk, max_length=max_length, min_length=min_length, do_sample=False)[0]['summary_text']
+                summaries.append(summary)
+
         result = ' '.join(summaries)
 
         return result if len(result) > 0 else "No summary generated."
