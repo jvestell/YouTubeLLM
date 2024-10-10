@@ -38,10 +38,38 @@ def build_faiss_index(passage_embeddings):
     faiss_index.add(passage_embeddings)
     return faiss_index
 
-def search_relevant_passages(videos_df, faiss_index, query_encoder, query_tokenizer, query, top_k=5, laughter_weight=0.1, applause_weight=0.05):
+def calculate_laughter_intensity(laughter_timestamps, video_duration, window_size=30):
     """
-    Encode the query and search for the most relevant passages, incorporating laughter and applause counts
+    Calculate laughter intensity based on the frequency of laughter in a sliding window.
+    
+    :param laughter_timestamps: List of timestamps where laughter occurred
+    :param video_duration: Total duration of the video in seconds
+    :param window_size: Size of the sliding window in seconds
+    :return: A laughter intensity score
     """
+    if not laughter_timestamps:
+        return 0
+    
+    # Create a histogram of laughter occurrences
+    num_bins = int(video_duration / window_size) + 1
+    hist, _ = np.histogram(laughter_timestamps, bins=num_bins, range=(0, video_duration))
+    
+    # Calculate the intensity score
+    # We'll use the maximum number of laughs in any window as our intensity score
+    intensity_score = np.max(hist)
+    
+    # Normalize the score by dividing by the window size
+    normalized_intensity = intensity_score / window_size
+    
+    return normalized_intensity
+
+def get_video_duration(transcript_segments):
+    if transcript_segments and isinstance(transcript_segments, list) and transcript_segments[-1]:
+        last_segment = transcript_segments[-1]
+        return last_segment['start'] + last_segment['duration']
+    return 0  # Return 0 if no valid transcript segments
+
+def search_relevant_passages(videos_df, faiss_index, query_encoder, query_tokenizer, query, top_k=5, content_weight=0.7, laughter_weight=0.2, applause_weight=0.1):
     query_inputs = query_tokenizer(query, return_tensors='pt', max_length=128, truncation=True, padding=True)
 
     with torch.no_grad():
@@ -57,19 +85,27 @@ def search_relevant_passages(videos_df, faiss_index, query_encoder, query_tokeni
     candidate_videos = videos_df.iloc[candidate_indices].copy()
     
     # Calculate the base similarity scores
-    base_similarity_scores = 1 / (1 + np.exp(distances[0]))  # Convert distances to similarity scores
+    base_similarity_scores = 1 / (1 + np.exp(-distances[0]))  # Convert distances to similarity scores
     
-    # Normalize laughter and applause counts
-    max_laughter = candidate_videos['laughter_count'].max()
+    # Calculate laughter intensity for each video
+    candidate_videos['laughter_intensity'] = candidate_videos.apply(
+        lambda row: calculate_laughter_intensity(
+            row['LaughterTimestamps'] if isinstance(row['LaughterTimestamps'], list) else [],
+            get_video_duration(row['TranscriptSegments'])
+        ),
+        axis=1
+    )
+    
+    # Normalize laughter intensity and applause counts
+    max_laughter_intensity = candidate_videos['laughter_intensity'].max()
     max_applause = candidate_videos['applause_count'].max()
-    normalized_laughter = candidate_videos['laughter_count'] / max_laughter if max_laughter > 0 else 0
+    normalized_laughter_intensity = candidate_videos['laughter_intensity'] / max_laughter_intensity if max_laughter_intensity > 0 else 0
     normalized_applause = candidate_videos['applause_count'] / max_applause if max_applause > 0 else 0
     
     # Calculate the final similarity scores
-    content_weight = 1 - (laughter_weight + applause_weight)
     final_similarity_scores = (
         base_similarity_scores * content_weight +
-        normalized_laughter * laughter_weight +
+        normalized_laughter_intensity * laughter_weight +
         normalized_applause * applause_weight
     )
     

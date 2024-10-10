@@ -1,0 +1,12 @@
+# Create a virtual environment
+python3 -m venv appropriate-venv
+
+appropriate-venv\Scripts\activate
+
+deactivate
+
+# Upgrade pip
+pip install --upgrade pip
+
+# Install the required packages
+pip install youtube-search-python youtube_transcript_api langchain_huggingface langchain langchain_community transformers torch faiss-cpu
