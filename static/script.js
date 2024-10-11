@@ -85,17 +85,26 @@ document.addEventListener('DOMContentLoaded', (event) => {
     function displayPreferredMoments(moments) {
         preferredMomentsSection.innerHTML = '<h2>Preferred Moments</h2>';
         moments.forEach((moment, index) => {
-            const videoUrl = `https://www.youtube.com/watch?v=${moment.video_id}&t=${moment.timestamp}`;
+            const videoUrl = `https://www.youtube.com/watch?v=${moment.video_id}&t=${Math.floor(moment.timestamp)}`;
+            const formattedTimestamp = formatTimestamp(moment.timestamp);
+            const similarityPercentage = (moment.similarity_score * 100).toFixed(2);
             preferredMomentsSection.innerHTML += `
                 <div class="preferred-moment-item">
                     <h3>Moment ${index + 1}</h3>
-                    <p>${moment.summary}</p>
-                    <p><a href="${videoUrl}" target="_blank">Watch this moment</a></p>
+                    <p>${moment.text}</p>
+                    <p>Similarity: ${similarityPercentage}%</p>
+                    <p><a href="${videoUrl}" target="_blank">Watch this moment (at ${formattedTimestamp})</a></p>
                 </div>
             `;
         });
         preferredMomentsSection.style.display = 'block';
         resultsSection.style.display = 'none';
+    }
+
+    function formatTimestamp(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
 
     function displayError(message) {

@@ -86,9 +86,6 @@ def extract_transcripts(videos):
     # Initialize new columns
     videos_df['Transcript'] = ''
     videos_df['TranscriptSegments'] = None
-    videos_df['LaughterTimestamps'] = None
-    videos_df['laughter_count'] = 0
-    videos_df['applause_count'] = 0
 
     for index, row in videos_df.iterrows():
         youtube_url = row['Link']
@@ -98,37 +95,28 @@ def extract_transcripts(videos):
         # Initialize default values
         videos_df.at[index, 'Transcript'] = ''
         videos_df.at[index, 'TranscriptSegments'] = []
-        videos_df.at[index, 'LaughterTimestamps'] = []
-        videos_df.at[index, 'laughter_count'] = 0
-        videos_df.at[index, 'applause_count'] = 0
 
         if video_id:
             try:
                 transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
                 
                 transcript_segments = []
-                laughter_timestamps = []
+                full_transcript = []
                 
                 for segment in transcript_list:
                     text = segment['text']
                     start = segment['start']
                     duration = segment['duration']
                     
-                    if '[Laughter]' in text:
-                        laughter_timestamps.append(start)
-                        text = text.replace('[Laughter]', '')
-                    
                     transcript_segments.append({
                         'text': text,
                         'start': start,
                         'duration': duration
                     })
+                    full_transcript.append(text)
                 
-                videos_df.at[index, 'Transcript'] = ' '.join([segment['text'] for segment in transcript_segments])
+                videos_df.at[index, 'Transcript'] = ' '.join(full_transcript)
                 videos_df.at[index, 'TranscriptSegments'] = transcript_segments
-                videos_df.at[index, 'LaughterTimestamps'] = laughter_timestamps
-                videos_df.at[index, 'laughter_count'] = len(laughter_timestamps)
-                videos_df.at[index, 'applause_count'] = videos_df.at[index, 'Transcript'].count('[Applause]')
                 
                 print(f"Transcript fetched for video: '{video_title}'")
             except TranscriptsDisabled:

@@ -1,8 +1,9 @@
 import os
 from flask import Flask, render_template, request, jsonify, session
 from dotenv import load_dotenv
-from youtube_utils import fetch_youtube_videos, extract_transcripts
+from youtube_utils import fetch_youtube_videos, extract_transcripts, extract_video_id
 from summarization import summarize_transcripts
+from similarity_search import find_preferred_moments
 import pandas as pd
 from flask_session import Session
 import traceback
@@ -71,6 +72,7 @@ def fetch_videos():
         
         app.logger.info("Storing data in session")
         session['videos_df'] = videos_df.to_json()
+        session['preferences'] = preferences  # Store preferences in session
         
         app.logger.info("Data stored in session")
         
@@ -86,48 +88,14 @@ def show_preferred_moments():
     try:
         if 'videos_df' in session:
             videos_df = pd.read_json(session['videos_df'])
-            summarized_df = summarize_videos(videos_df)
-            preferred_moments = []
-            for _, row in summarized_df.iterrows():
-                summary = row['Summary']
-                video_id = extract_video_id(row['Link'])
-                timestamp = get_timestamp_for_summary(row['Transcript'], summary)
-                preferred_moments.append({
-                    'summary': summary,
-                    'video_id': video_id,
-                    'timestamp': timestamp
-                })
+            preferences = session.get('preferences', PREFERENCES)
+            preferred_moments = find_preferred_moments(videos_df, preferences)
             return jsonify({'preferred_moments': preferred_moments})
         else:
             return jsonify({'error': 'No videos fetched yet. Please fetch videos first.'}), 400
     except Exception as e:
         app.logger.error(f"Error in show_preferred_moments: {str(e)}\n{traceback.format_exc()}")
         return jsonify({'error': 'An error occurred while showing preferred moments. Please try again.'}), 500
-
-def extract_video_id(url):
-    # Extract video ID from YouTube URL
-    video_id = url.split('v=')[-1]
-    ampersand_pos = video_id.find('&')
-    if ampersand_pos != -1:
-        video_id = video_id[:ampersand_pos]
-    return video_id
-
-def get_timestamp_for_summary(transcript, summary):
-    # This is a simple implementation. You might want to use more sophisticated
-    # text matching algorithms for better accuracy.
-    words = summary.split()[:10]  # Use first 10 words of summary
-    search_phrase = ' '.join(words)
-    
-    transcript_lower = transcript.lower()
-    search_phrase_lower = search_phrase.lower()
-    
-    index = transcript_lower.find(search_phrase_lower)
-    if index != -1:
-        # Count newlines before the match to estimate the timestamp
-        newlines_before = transcript[:index].count('\n')
-        # Assume each line represents roughly 5 seconds
-        return newlines_before * 5
-    return 0  # Default to start of video if no match found
 
 # Run the app if this script is executed
 if __name__ == '__main__':
