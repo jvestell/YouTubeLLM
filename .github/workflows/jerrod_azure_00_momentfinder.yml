@@ -28,7 +28,9 @@ jobs:
           source venv/bin/activate
       
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          pip install gunicorn
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
@@ -75,4 +77,8 @@ jobs:
         with:
           app-name: 'MomentFinder'
           slot-name: 'Production'
-          
+          startup-command: 'gunicorn --bind=0.0.0.0 --timeout 600 wsgi:app'
+        env:
+          PYTHONUNBUFFERED: 1
+          FLASK_ENV: production
+          FLASK_DEBUG: 0
