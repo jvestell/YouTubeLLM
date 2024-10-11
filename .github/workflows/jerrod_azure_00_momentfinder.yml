@@ -28,9 +28,7 @@ jobs:
           source venv/bin/activate
       
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install gunicorn
+        run: pip install -r requirements.txt
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
@@ -67,9 +65,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_97D80F2BD4094B0CB8134E41C0BCAFB4 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_C82882C5F1884E849BEE7584E6557D97 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_184B8861670D48389B04D679E2E7066F }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_B0A6E4A6B97F425CAEEB987AD0ACE975 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_817173BE095844168BCCBDC9A607548B }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_77BBF89E878C4064BC60682F38411D8A }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
@@ -77,8 +75,4 @@ jobs:
         with:
           app-name: 'MomentFinder'
           slot-name: 'Production'
-          startup-command: 'gunicorn --bind=0.0.0.0 --timeout 600 wsgi:app'
-        env:
-          PYTHONUNBUFFERED: 1
-          FLASK_ENV: production
-          FLASK_DEBUG: 0
+          
