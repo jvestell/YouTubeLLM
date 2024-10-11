@@ -70,6 +70,11 @@ def get_video_duration(transcript_segments):
     return 0  # Return 0 if no valid transcript segments
 
 def search_relevant_passages(videos_df, faiss_index, query_encoder, query_tokenizer, query, top_k=5, content_weight=0.7, laughter_weight=0.2, applause_weight=0.1):
+
+    # Deserialize the FAISS index if it's in bytes format
+    if isinstance(faiss_index, bytes):
+        faiss_index = faiss.deserialize(faiss_index)
+
     query_inputs = query_tokenizer(query, return_tensors='pt', max_length=128, truncation=True, padding=True)
 
     with torch.no_grad():
