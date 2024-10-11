@@ -85,10 +85,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
     function displayPreferredMoments(moments) {
         preferredMomentsSection.innerHTML = '<h2>Preferred Moments</h2>';
         moments.forEach((moment, index) => {
+            const videoUrl = `https://www.youtube.com/watch?v=${moment.video_id}&t=${moment.timestamp}`;
             preferredMomentsSection.innerHTML += `
                 <div class="preferred-moment-item">
                     <h3>Moment ${index + 1}</h3>
-                    <p>${moment}</p>
+                    <p>${moment.summary}</p>
+                    <p><a href="${videoUrl}" target="_blank">Watch this moment</a></p>
                 </div>
             `;
         });
