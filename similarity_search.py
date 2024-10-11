@@ -10,6 +10,10 @@ def find_preferred_moments(videos_df, preferences, top_k=5):
         transcript = row['Transcript']
         video_id = extract_video_id(row['Link'])
         
+        if not isinstance(transcript, str) or transcript.startswith("Error") or transcript.startswith("No transcript"):
+            logging.warning(f"Skipping video {video_id} due to missing or invalid transcript")
+            continue
+
         # Split transcript into sentences
         sentences = transcript.split('.')
         
@@ -43,16 +47,25 @@ def find_preferred_moments(videos_df, preferences, top_k=5):
 
 def get_timestamp(transcript_segments, sentence):
     sentence = sentence.strip().lower()
+    if not sentence or not transcript_segments:
+        return 0  # Return start of video if sentence is empty or no transcript segments
+
     best_match = None
     best_match_ratio = 0
 
+    sentence_words = set(sentence.split())
+    if not sentence_words:
+        return 0  # Return start of video if sentence has no words
+
     for segment in transcript_segments:
         segment_text = segment['text'].lower()
+        segment_words = set(segment_text.split())
         
         # Calculate the ratio of words from the sentence that appear in the segment
-        sentence_words = set(sentence.split())
-        segment_words = set(segment_text.split())
-        match_ratio = len(sentence_words.intersection(segment_words)) / len(sentence_words)
+        if sentence_words:
+            match_ratio = len(sentence_words.intersection(segment_words)) / len(sentence_words)
+        else:
+            match_ratio = 0
 
         if match_ratio > best_match_ratio:
             best_match = segment

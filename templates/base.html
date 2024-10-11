@@ -3,30 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}YouTube Comedy Analysis{% endblock %}</title>
+    <title>{% block title %}MomentFinder{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>YouTube Comedy Analysis</h1>
-        </div>
-    </header>
-
-    <main>
-        <div class="container">
+    <div class="clouds">
+        <div class="cloud x1"></div>
+        <div class="cloud x2"></div>
+        <div class="cloud x3"></div>
+        <div class="cloud x4"></div>
+        <div class="cloud x5"></div>
+    </div>
+    <div class="container">
+        <header>
+            <h1>MomentFinder</h1>
+        </header>
+        <main>
             {% block content %}
             {% endblock %}
-        </div>
-    </main>
-
-    <footer>
-        <div class="container">
-            <p>&copy; YouTube Comedy Analysis</p>
-        </div>
-    </footer>
-
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+        </main>
+        <footer>
+            <p>&copy; 2024 MomentFinder. All rights reserved.</p>
+        </footer>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

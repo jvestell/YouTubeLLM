@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     function formatTimestamp(seconds) {
         const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
+        const remainingSeconds = Math.floor(seconds % 60);  // Truncate to whole seconds
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
 

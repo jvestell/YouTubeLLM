@@ -90,6 +90,8 @@ def show_preferred_moments():
             videos_df = pd.read_json(session['videos_df'])
             preferences = session.get('preferences', PREFERENCES)
             preferred_moments = find_preferred_moments(videos_df, preferences)
+            if not preferred_moments:
+                return jsonify({'error': 'No preferred moments found. Try adjusting your preferences or fetching more videos.'}), 404
             return jsonify({'preferred_moments': preferred_moments})
         else:
             return jsonify({'error': 'No videos fetched yet. Please fetch videos first.'}), 400
