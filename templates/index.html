@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}MomentFinder - YouTube Video Analysis{% endblock %}
+
+{% block content %}
+    <section id="search-form">
+        <h2>Search for Videos</h2>
+        <form id="video-search-form">
+            <div class="form-group">
+                <label for="topic">Topic:</label>
+                <input type="text" id="topic" name="topic" value="Kill Tony comedy" required>
+            </div>
+            <div class="form-group">
+                <label for="preferences">Preferences:</label>
+                <input type="text" id="preferences" name="preferences" value="Laughter">
+            </div>
+            <div class="form-group">
+                <label for="max_results">Max Results:</label>
+                <input type="number" id="max_results" name="max_results" value="20" min="1" max="50">
+            </div>
+            <div class="form-group">
+                <label for="min_views">Minimum Views:</label>
+                <input type="number" id="min_views" name="min_views" value="100000" min="0">
+            </div>
+            <div class="form-group">
+                <button type="submit" id="fetch-videos">Fetch Videos</button>
+                <button type="button" id="show-preferred-moments">Show Preferred Moments</button>
+            </div>
+        </form>
+    </section>
+
+    <section id="results" style="display: none;">
+        <h2>Fetched Videos</h2>
+        <div id="videos-container"></div>
+    </section>
+
+    <section id="preferred-moments" style="display: none;">
+        <h2>Preferred Moments</h2>
+        <div id="preferred-moments-content"></div>
+    </section>
+
+    <section id="summary" style="display: none;">
+        <h2>Summary</h2>
+        <div id="summary-content"></div>
+    </section>
+
+    <section id="search-results" style="display: none;">
+        <h2>Search Results</h2>
+        <div id="search-content"></div>
+    </section>
+
+    <section id="questions" style="display: none;">
+        <h2>Generated Questions</h2>
+        <ul id="questions-list"></ul>
+    </section>
+{% endblock %}
