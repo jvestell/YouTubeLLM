@@ -8,9 +8,17 @@ def parse_views(views_str):
     """
     Parses the views string from YouTube and converts it to an integer.
     """
-    if len(views_str) > 1:
-        views_str = views_str.lower().replace('views', '').replace(',', '').strip()
-    return int(views_str)
+    # Remove commas and 'views' or 'view' from the string
+    cleaned_str = views_str.lower().replace(',', '').replace('views', '').replace('view', '').strip()
+    
+    # Use regex to extract the numeric part
+    match = re.search(r'\d+', cleaned_str)
+    if match:
+        return int(match.group())
+    else:
+        # If no numeric part is found, return 0 or raise an exception
+        # Returning 0 for now, but you might want to handle this differently
+        return 0
 
 def fetch_youtube_videos(topic, preferences, min_views, max_results=10):
     """

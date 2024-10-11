@@ -2,14 +2,11 @@ import os
 from flask import Flask, render_template, request, jsonify, session
 from dotenv import load_dotenv
 from youtube_utils import fetch_youtube_videos, extract_transcripts, extract_video_id
-from summarization import summarize_transcripts
-from similarity_search import find_preferred_moments
 import pandas as pd
 from flask_session import Session
 import traceback
+from similarity_search import find_preferred_moments
 from werkzeug.exceptions import BadRequest, InternalServerError
-import faiss
-import numpy as np
 
 # Load environment variables
 load_dotenv()
@@ -24,8 +21,6 @@ TOPIC = "Kill Tony comedy"
 PREFERENCES = ["Laughter"]
 MAX_RESULTS = 20
 MIN_VIEWS = 100000
-LLM = "facebook/bart-large-cnn"
-MAX_TOKENS = 1000
 
 @app.errorhandler(BadRequest)
 def handle_bad_request(e):
@@ -41,9 +36,6 @@ def fetch_and_process_videos(topic, preferences, min_views, max_results):
     videos_df = pd.DataFrame(videos)
     videos_df = extract_transcripts(videos_df)
     return videos_df
-
-def summarize_videos(videos_df):
-    return summarize_transcripts(videos_df, LLM, MAX_TOKENS)
 
 # Flask routes
 @app.route('/', methods=['GET', 'POST'])
