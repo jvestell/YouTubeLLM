@@ -121,11 +121,15 @@ def extract_transcripts(videos):
                 print(f"Transcript fetched for video: '{video_title}'")
             except TranscriptsDisabled:
                 videos_df.at[index, 'Transcript'] = "Transcripts are disabled for this video."
+                videos_df.at[index, 'TranscriptSegments'] = []
             except NoTranscriptFound:
                 videos_df.at[index, 'Transcript'] = "No transcripts found for this video."
+                videos_df.at[index, 'TranscriptSegments'] = []
             except Exception as e:
                 videos_df.at[index, 'Transcript'] = f"Error fetching transcript: {e}"
+                videos_df.at[index, 'TranscriptSegments'] = []
         else:
             videos_df.at[index, 'Transcript'] = "Invalid YouTube URL."
+            videos_df.at[index, 'TranscriptSegments'] = []
 
     return videos_df

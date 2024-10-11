@@ -1,6 +1,7 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+import logging
 
 def find_preferred_moments(videos_df, preferences, top_k=5):
     preferred_moments = []
@@ -33,6 +34,7 @@ def find_preferred_moments(videos_df, preferences, top_k=5):
                 'text': sentences[idx].strip(),
                 'similarity_score': float(similarities[0][idx])
             })
+            logging.info(f"Found preferred moment: video_id={video_id}, timestamp={timestamp}, text={sentences[idx].strip()}")
     
     # Sort all moments by similarity score
     preferred_moments.sort(key=lambda x: x['similarity_score'], reverse=True)
@@ -40,10 +42,32 @@ def find_preferred_moments(videos_df, preferences, top_k=5):
     return preferred_moments[:top_k]
 
 def get_timestamp(transcript_segments, sentence):
+    sentence = sentence.strip().lower()
+    best_match = None
+    best_match_ratio = 0
+
     for segment in transcript_segments:
-        if sentence.strip() in segment['text']:
+        segment_text = segment['text'].lower()
+        
+        # Calculate the ratio of words from the sentence that appear in the segment
+        sentence_words = set(sentence.split())
+        segment_words = set(segment_text.split())
+        match_ratio = len(sentence_words.intersection(segment_words)) / len(sentence_words)
+
+        if match_ratio > best_match_ratio:
+            best_match = segment
+            best_match_ratio = match_ratio
+
+        # If we find an exact match or a very close match, return immediately
+        if match_ratio > 0.8:
             return segment['start']
-    return 0  # Default to start of video if no match found
+
+    # If we found any match at all, return its timestamp
+    if best_match:
+        return best_match['start']
+
+    # If no match found, return the start of the video
+    return 0
 
 def extract_video_id(url):
     # Extract video ID from YouTube URL
