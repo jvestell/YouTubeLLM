@@ -124,6 +124,16 @@ def fetch_videos():
         videos_df = fetch_and_process_videos(topic, preferences, min_views, max_results)
         app.logger.info("Videos fetched and processed")
         
+        # Print available columns
+        app.logger.info(f"Available columns: {videos_df.columns.tolist()}")
+        
+        # Rename 'Views' to 'ViewCount' if it exists
+        if 'Views' in videos_df.columns:
+            videos_df = videos_df.rename(columns={'Views': 'ViewCount'})
+        elif 'ViewCount' not in videos_df.columns:
+            # If neither 'Views' nor 'ViewCount' is present, add a placeholder
+            videos_df['ViewCount'] = 'N/A'
+        
         app.logger.info("Setting up search")
         query_encoder, query_tokenizer, faiss_index = setup_search(videos_df)
         app.logger.info("Search setup complete")
