@@ -23,10 +23,6 @@ A Flask-based web application that helps users discover and filter YouTube video
 ## Installation
 
 1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/youtube-content-curator.git
-   cd youtube-content-curator
-   ```
 
 2. Create a virtual environment and activate it:
    ```
@@ -66,11 +62,3 @@ A Flask-based web application that helps users discover and filter YouTube video
 - `similarity_search.py`: Functions to identify preferred moments in videos
 - `templates/`: HTML templates for the web interface
 - `static/`: Static files (CSS, JavaScript, images)
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
